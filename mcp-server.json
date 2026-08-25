@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "humanport": {
+      "command": "python3",
+      "args": ["-u", "/mnt/c/users/kamit/onedrive - 福知山公立大学/AIConductor/HumanPort/humanport.py"],
+      "env": {
+        "HUMANPORT_DB": "/mnt/c/users/kamit/onedrive - 福知山公立大学/AIConductor/HumanPort/humanport.sqlite3"
+      }
+    }
+  }
+}
