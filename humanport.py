@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """Minimal in-memory HumanPort MCP server with a single Tkinter window."""
-import json, queue, sys, threading, uuid, tkinter as tk
+import json, os, queue, sys, threading, uuid, tkinter as tk
 from tkinter import ttk, messagebox
 
 tasks=queue.Queue(); pending={}; lock=threading.Lock()
 TOOLS=["human.request","human.await","human.get","human.cancel","human.list","human.capabilities","human.answer"]
+# Approver mode: the MCP client may ask and wait, but only the GUI can answer.
+APPROVER=os.environ.get("HUMANPORT_MODE")=="approver"
+HUMAN_ONLY={"human.answer","human.cancel","human.list"}
+if APPROVER: TOOLS=[n for n in TOOLS if n not in HUMAN_ONLY]
 
 def request(a):
     t=dict(a.get("task",a)); tid=str(uuid.uuid4()); t.update(task_id=tid,status="pending");
@@ -21,6 +25,7 @@ def answer(a,status="answered"):
         if t.get("status")!="pending": raise ValueError("ALREADY_COMPLETED")
         t.update(status=status,values=a.get("values",{}),actor=a.get("actor","human:local-user")); return t
 def call(name,a):
+    if APPROVER and name in HUMAN_ONLY: raise ValueError("METHOD_NOT_FOUND")
     if name=="human.request": return request(a)
     if name=="human.get": return get(a["task_id"])
     if name=="human.answer": return answer(a)
@@ -54,6 +59,8 @@ class App:
         else: self.root.after(300,self.poll)
     def show(self,t):
         w=tk.Toplevel(self.root); w.title(t.get("title","HumanPort")); w.geometry("520x330"); w.update_idletasks(); w.geometry(f"520x330+{(w.winfo_screenwidth()-520)//2}+{(w.winfo_screenheight()-330)//2}"); ttk.Label(w,text=t.get("title",""),font=("TkDefaultFont",14,"bold")).pack(pady=10); ttk.Label(w,text=t.get("prompt",""),wraplength=470).pack(pady=8); v=tk.StringVar()
+        if t.get("detail"):
+            w.geometry("640x560"); d=tk.Text(w,height=14,width=76,wrap="word"); d.insert("1.0",t["detail"]); d.configure(state="disabled"); d.pack(padx=10,pady=4)
         if t.get("kind")=="input":
             box=tk.Text(w,height=8,width=58); box.pack(pady=8); box.focus_set(); ttk.Button(w,text="送信",command=lambda:self.submit(t,box.get("1.0","end-1c"),w)).pack(pady=8)
         else:

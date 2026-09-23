@@ -27,3 +27,11 @@ MCPクライアントには `mcp-server.json` を登録してください。GUI�
 回答は `{"values":{"decision":"yes"}}` または `{"values":{"text":"入力文章"}}` の形で返ります。
 
 タスクと回答はプロセス終了時に破棄されます。MIT License。
+
+## 承認者モード（AIConductor）
+
+`HUMANPORT_MODE=approver` で起動すると、MCP からは `human.request` / `human.await` /
+`human.get` / `human.capabilities` だけが使え、`human.answer` / `human.cancel` /
+`human.list` は提供されません。回答は GUI からのみ行えます。AIConductor は
+`scripts/mcp/start-humanport-approver` 経由でこのモードを使い、承認対象の正規化 action を
+`detail` 欄に表示します。

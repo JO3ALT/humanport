@@ -19,3 +19,11 @@ python3 humanport.py
 Register `mcp-server.json` with your MCP client. The GUI appears when a request is pending.
 
 Answers use `values.decision` for choices and `values.text` for written input. Tasks are discarded when the process exits. MIT License.
+
+## Approver mode (AIConductor)
+
+With `HUMANPORT_MODE=approver`, MCP clients can only use `human.request`,
+`human.await`, `human.get` and `human.capabilities`; `human.answer`,
+`human.cancel` and `human.list` are not offered, so only the GUI can answer.
+AIConductor uses this mode through `scripts/mcp/start-humanport-approver` and
+shows the canonical action in the `detail` pane.
